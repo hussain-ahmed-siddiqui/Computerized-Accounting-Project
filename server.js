@@ -242,40 +242,50 @@ app.get('/showAccountLedger/:id', (req, res) => {
     });
 })
 
-app.get('/createAdjustment:id',(req,res)=>{
-    if(req.params.id===null){
-    console.log("id null he");
-    console.log(req.body);
+app.get('/allAdjustments',(req,res)=>{
+    let sql = 'SELECT * FROM adjustments';
+    db.query(sql,function(err,result,fields){
+        if(err){
+        console.error("Database error:", err);
+        res.status(500).send('Database error'); // Send a HTTP 500 response on error
+    } else {
+        console.log(result);
+        res.json(result); // Send the results as JSON to the client
     }
-    
-
+    })
 });
 
 app.post('/saveAllAdjustments',async(req,res)=>{
     const adjustments = req.body.adjustments; // Expecting an array of adjustments
+    console.log(adjustments);
+    let transactionId=0;
 
     try {
         // Start database transaction
         await db.beginTransaction();
 
         for (const adjustment of adjustments) {
-            const { transactionDate, debitAccounts, debitValues, creditAccounts, creditValues, description } = adjustment;
-
+            const { date, debitAccount, debitAmount, creditAccount, creditAmount, description } = adjustment;
+            let sql = 'INSERT INTO transactions set ?'
+            let rec = { transactionDate: date, debitAccounts: debitAccount, debitValues: debitAmount, creditAccounts: creditAccount, creditValues: creditAmount };
+            console.log(rec);
             // Insert into transactions table
-            const transactionResult = await db.query(
-                `INSERT INTO transactions (transactionDate, debitAccounts, debitValues, creditAccounts, creditValues)
-                 VALUES (?, ?, ?, ?, ?)`,
-                [transactionDate, debitAccounts, debitValues, creditAccounts, creditValues]
-            );
+            db.query(
+                sql,rec,function(err,result,fields){
+                    if (err) {throw err;}
+                    else {transactionId = result.insertId;
+                        rec = {transactionDate:date, description:description, transaction_id:transactionId};
+                        console.log(rec);
+            
+                        // Insert into adjustments table
+                         db.query(
+                            `INSERT INTO adjustments set ?`,rec
+                        );
+                    }
+                });
+            
 
-            const transactionId = transactionResult.insertId;
-
-            // Insert into adjustments table
-            await db.query(
-                `INSERT INTO adjustments (transactionDate, description, transaction_id)
-                 VALUES (?, ?, ?)`,
-                [transactionDate, description, transactionId]
-            );
+          
         }
 
         // Commit transaction if all inserts are successful

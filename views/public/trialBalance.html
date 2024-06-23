@@ -435,6 +435,7 @@
         $(document).ready(() => {
             $.get('http://localhost:3000/allAccountsData', {}, function(data) {
                 data = JSON.parse(data);
+                console.log(data);
                 tableHTML = '';
                 totalDeb = totalCred = 0;
                 flag = true;
@@ -445,6 +446,7 @@
                         let debSum = 0;
                         let credSum = 0;
                         data2 = JSON.parse(data2);
+                        console.log(data2);
                         for (let j = 1; j < data2.length; j++) {
                             flag = false;
                             if (data2[j].debitAccounts === account) {

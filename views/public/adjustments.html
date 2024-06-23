@@ -225,6 +225,8 @@
                                         </tr>
                                     </tfoot>
                                 </table>
+                                <button type="button" class="btn btn-primary" id="saveAllAdjustments">Save All Adjustments</button>
+
                             </div>
                             <!-- /.card-body -->
                         </div>
@@ -436,20 +438,62 @@
                     $('#addAdjustmentModal').modal('show');
                 });
             });
+            let adjustments = []; // Array to hold pending adjustments
 
             $('#saveAdjustment').click(function() {
                 const adjustment = {
                     date: $('#adjustmentDate').val(),
-                    account: $('#adjustmentAccount').val(),
-                    debit: $('#adjustmentDebitAmount').val(),
-                    credit: $('#adjustmentCreditAmount').val(),
+                    debitAccount: $('#debitAccount').val(),
+                    debitAmount: $('#debitAmount').val(),
+                    creditAccount: $('#creditAccount').val(),
+                    creditAmount: $('#creditAmount').val(),
                     description: $('#adjustmentDescription').val()
-                    // notes: $('#adjustmentNotes').val()
-                };
-                // Placeholder for API integration
-                $.post('http://localhost:3000/saveAdjustment', adjustment, function(response) {
-                    $('#addAdjustmentModal').modal('hide');
-                    loadAdjustments();
+                    
+    };
+
+                // Add the adjustment to the array
+                adjustments.push(adjustment);
+                updatePendingAdjustmentsDisplay(); // Update the UI
+               console.log(typeof(adjustments));
+            });
+
+            function updatePendingAdjustmentsDisplay() {
+                let rows = adjustments.map((adj, index) => `
+                    <tr>
+                        <td>${adj.date}</td>
+                        <td>${adj.debitAccount}</td>
+                        <td>${adj.debitAmount}</td>
+                        <td>${adj.creditAccount}</td>
+                        <td>${adj.creditAmount}</td>
+                        <td>${adj.description}</td>
+                        <td><button class="btn btn-danger" onclick="removeAdjustment(${index})">Remove</button></td>
+                    </tr>
+                `).join('');
+                $('#pendingAdjustments').html(rows);
+            }
+
+            function removeAdjustment(index) {
+                adjustments.splice(index, 1); // Remove the adjustment from the array
+                updatePendingAdjustmentsDisplay(); // Refresh the display
+            }
+
+            $('#saveAllAdjustments').click(function() {
+                $.ajax({
+                    url:'http://localhost:3000/saveAllAdjustments',
+                    type:'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({adjustments: adjustments}),
+                    success: function(response) {
+                        $('#addAdjustmentModal').modal('hide');
+                        console.log(response);
+                        adjustments = []; // Clear the local adjustment list
+                        updatePendingAdjustmentsDisplay();
+                        loadAdjustments(); // Reload adjustments display from the server
+                        alert('Adjustments saved successfully!');
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Failed to save adjustments: ' + xhr.responseText);
+                    }
                 });
             });
 

@@ -10,6 +10,7 @@ const static_path = path.join(__dirname, '/views');
 app.use('/', express.static('views'));
 app.use(bodyParser.urlencoded({ extended: false }));
 // app.use(express.json);
+app.use(express.json()); // This line is crucial for your server to accept JSON payloads
 
 //Creating Connection
 const db = mysql.createConnection({
@@ -241,17 +242,50 @@ app.get('/showAccountLedger/:id', (req, res) => {
     });
 })
 
-app.get('/createAdjustment',(req,res)=>{
+app.get('/createAdjustment:id',(req,res)=>{
+    if(req.params.id===null){
+    console.log("id null he");
+    console.log(req.body);
+    }
+    
 
-    let adjustments = [
-        {
-            id: 3,
-            date: '2024-03-31',
-            account: 'Depreciation Expense',
-            debit: 500,
-            credit: 0,
-            description: 'Depreciation for office equipment',
-            notes: 'Monthly depreciation'
+});
+
+app.post('/saveAllAdjustments',async(req,res)=>{
+    const adjustments = req.body.adjustments; // Expecting an array of adjustments
+
+    try {
+        // Start database transaction
+        await db.beginTransaction();
+
+        for (const adjustment of adjustments) {
+            const { transactionDate, debitAccounts, debitValues, creditAccounts, creditValues, description } = adjustment;
+
+            // Insert into transactions table
+            const transactionResult = await db.query(
+                `INSERT INTO transactions (transactionDate, debitAccounts, debitValues, creditAccounts, creditValues)
+                 VALUES (?, ?, ?, ?, ?)`,
+                [transactionDate, debitAccounts, debitValues, creditAccounts, creditValues]
+            );
+
+            const transactionId = transactionResult.insertId;
+
+            // Insert into adjustments table
+            await db.query(
+                `INSERT INTO adjustments (transactionDate, description, transaction_id)
+                 VALUES (?, ?, ?)`,
+                [transactionDate, description, transactionId]
+            );
         }
-    ];
-})
+
+        // Commit transaction if all inserts are successful
+        await db.commit();
+
+        res.send({ success: true, message: 'All adjustments saved successfully' });
+    } catch (error) {
+        // Rollback in case of error
+        await db.rollback();
+        res.status(500).send({ success: false, message: 'Failed to save adjustments', error: error.message });
+    }
+    
+});

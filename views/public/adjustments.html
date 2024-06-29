@@ -392,15 +392,15 @@
                         tableBody += `
                             <tr>
                                 <td>${adjustment.transactionDate}</td>
-                                <td>${adjustment.transaction_id}</td>
-                                <td>${adjustment.transaction_id}</td>
-                                <td>${adjustment.transaction_id}</td>
-                                <td>${adjustment.transaction_id}</td>
+                                <td>${adjustment.debitAccounts}</td>
+                                <td>${adjustment.debitValues}</td>
+                                <td>${adjustment.creditAccounts}</td>
+                                <td>${adjustment.creditValues}</td>
                                 <td>${adjustment.description}</td>
                                 <td class="text-center">
-                                    <button class="btn btn-info btn-sm viewAdjustment" data-id="${adjustment.id}"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-warning btn-sm editAdjustment" data-id="${adjustment.id}"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-danger btn-sm deleteAdjustment" data-id="${adjustment.id}"><i class="fas fa-trash"></i></button>
+                                    <button class="btn btn-info btn-sm viewAdjustment" data-id="${adjustment.transcation_id}"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-warning btn-sm editAdjustment" data-id="${adjustment.transcation_id}"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-danger btn-sm deleteAdjustment" data-id="${adjustment.transcation_id}"><i class="fas fa-trash"></i></button>
                                 </td>
                             </tr>
                         `;
@@ -428,7 +428,7 @@
             $(document).on('click', '.editAdjustment', function() {
                 const id = $(this).data('id');
                 // Placeholder for API integration
-                $.get(`http://localhost:3000/createAdjustment/${id}`, {}, function(data) {
+                $.get(`http://localhost:3000/editAdjustment`, {}, function(data) {
                     data = JSON.parse(data);
                     $('#adjustmentDate').val(data.date);
                     $('#debitAccount').val(data.debitAccount);

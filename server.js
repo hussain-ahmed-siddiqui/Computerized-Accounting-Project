@@ -243,7 +243,7 @@ app.get('/showAccountLedger/:id', (req, res) => {
 })
 
 app.get('/allAdjustments',(req,res)=>{
-    let sql = 'SELECT * FROM adjustments';
+    let sql = 'SELECT transactions.transactionDate, transactions.debitAccounts, transactions.debitValues,transactions.creditAccounts, transactions.creditValues, adjustments.description, adjustments.transaction_id FROM transactions INNER JOIN adjustments WHERE transactions.id=adjustments.transaction_id';
     db.query(sql,function(err,result,fields){
         if(err){
         console.error("Database error:", err);
@@ -299,3 +299,9 @@ app.post('/saveAllAdjustments',async(req,res)=>{
     }
     
 });
+
+app.post('/editAdjustment:id',(req,res)=>{
+    let adjustment = req.params.body;
+    // let sql = `UPDATE adjustments SET ${adjustment.}  WHERE id=${adjustment.id}`;
+
+})

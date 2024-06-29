@@ -112,7 +112,7 @@
                             </ul>
                         </li>
                         <li class="nav-item">
-                            <a href="/generalJournal" class="nav-link">
+                            <a href="/journal" class="nav-link">
                                 <i class="nav-icon fas fa-copy"></i>
                                 <p>General Journal</p>
                             </a>
@@ -383,7 +383,6 @@
             loadAdjustments();
 
             function loadAdjustments() {
-                // Placeholder for API integration
                 $.get('http://localhost:3000/allAdjustments', {}, function(data) {
                     console.log(data);
                     // data = JSON.parse(data);
@@ -398,9 +397,8 @@
                                 <td>${adjustment.creditValues}</td>
                                 <td>${adjustment.description}</td>
                                 <td class="text-center">
-                                    <button class="btn btn-info btn-sm viewAdjustment" data-id="${adjustment.transcation_id}"><i class="fas fa-eye"></i></button>
-                                    <button class="btn btn-warning btn-sm editAdjustment" data-id="${adjustment.transcation_id}"><i class="fas fa-edit"></i></button>
-                                    <button class="btn btn-danger btn-sm deleteAdjustment" data-id="${adjustment.transcation_id}"><i class="fas fa-trash"></i></button>
+                                    <button class="btn btn-warning btn-sm editAdjustment" data-id="${adjustment.transaction_id}"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-danger btn-sm deleteAdjustment" data-id="${adjustment.transaction_id}"><i class="fas fa-trash"></i></button>
                                 </td>
                             </tr>
                         `;
@@ -409,32 +407,17 @@
                 });
             }
 
-            $(document).on('click', '.viewAdjustment', function() {
-                const id = $(this).data('id');
-                // Placeholder for API integration
-                $.get(`http://localhost:3000/adjustment/${id}`, {}, function(data) {
-                    data = JSON.parse(data);
-                    $('#detailDate').val(data.date);
-                    $('#detailDebitAccount').val(data.debitAccount);
-                    $('#detailDebitAmount').val(data.debit);
-                    $('#detailCreditAccount').val(data.creditAccount);
-                    $('#detailCreditAmount').val(data.credit);
-                    $('#detailDescription').val(data.description);
-                    // $('#detailNotes').val(data.notes);
-                    $('#adjustmentDetailModal').modal('show');
-                });
-            });
+
 
             $(document).on('click', '.editAdjustment', function() {
                 const id = $(this).data('id');
-                // Placeholder for API integration
                 $.get(`http://localhost:3000/editAdjustment`, {}, function(data) {
                     data = JSON.parse(data);
-                    $('#adjustmentDate').val(data.date);
-                    $('#debitAccount').val(data.debitAccount);
-                    $('#debitAmount').val(data.debit);
-                    $('#creditAccount').val(data.creditAccount);
-                    $('#creditAmount').val(data.credit);
+                    $('#adjustmentDate').val(data.transactionDate);
+                    $('#debitAccount').val(data.debitAccounts);
+                    $('#debitAmount').val(data.debitValues);
+                    $('#creditAccount').val(data.creditAccounts);
+                    $('#creditAmount').val(data.creditValues);
                     $('#adjustmentDescription').val(data.description);
                     // $('#adjustmentNotes').val(data.notes);
                     $('#addAdjustmentModal').modal('show');
@@ -501,7 +484,7 @@
 
             $(document).on('click', '.deleteAdjustment', function() {
                 const id = $(this).data('id');
-                // Placeholder for API integration
+                console.log($(this));
                 $.post(`http://localhost:3000/deleteAdjustment`, { id }, function(response) {
                     loadAdjustments();
                 });

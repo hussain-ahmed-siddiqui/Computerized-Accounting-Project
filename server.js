@@ -305,3 +305,17 @@ app.post('/editAdjustment:id',(req,res)=>{
     // let sql = `UPDATE adjustments SET ${adjustment.}  WHERE id=${adjustment.id}`;
 
 })
+
+app.post('/deleteAdjustment',(req,res)=>{
+    let _id = req.body.id;
+    let sql = `DELETE FROM transactions WHERE id=${_id}`;
+    db.query(sql,function(err,result,fields){
+        if(err){
+        console.error("Database error:", err);
+        res.status(500).send('Database error'); // Send a HTTP 500 response on error
+    } else {
+        console.log("Delete Successfully");
+        res.json("Adjustment has been removed");
+    }
+    })
+});

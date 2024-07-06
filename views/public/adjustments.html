@@ -300,7 +300,8 @@
                         <select class="form-control" id="adjustmentType" required>
                             <option value="">Select Type</option>
                             <option value="Depreciation">Depreciation</option>
-                            <option value="Accrued_expense">Accrued Expense</option>
+                            <option value="Accrued Expense">Accrued Expense</option>
+                            <option value="Accrued Revenue">Accrued Revenue</option>
                             <!-- Add other types as needed -->
                         </select>
                     </div>
@@ -435,6 +436,10 @@
                 const amount = $('#adjustmentAmount').val();
                 if (adjustmentType === 'Depreciation'){
                     var debitAccount = 'Dep. Expense '+adjustmentOption; var creditAccount = 'Acc. Dep '+adjustmentOption;
+                }else if(adjustmentType === 'Accrued Revenue'){
+                    var debitAccount = 'Accounts Receivable'; var creditAccount = 'Service Revenue';
+                }else if(adjustmentType === 'Accrued Expense'){
+                    var debitAccount = adjustmentOption+' Expense'; var creditAccount = 'Accounts Payable';
                 }
                 const adjustment = {
                     date: $('#adjustmentDate').val(),
@@ -507,8 +512,11 @@
         var options = '';
         if (type === 'Depreciation') {
             options = '<option value="Building">Building</option><option value="F & F">Furniture & Fixtures</option>';
-        } else if (type === 'Accrued_expense') {
-            options = '<option value="rent">Rent</option><option value="utilities">Utilities</option>';
+        } else if (type === 'Accrued Expense') {
+            options = '<option value="Rental">Rent</option><option value="Supplies">Supplies</option><option value="Salary">Salary</option>';
+        }
+         else if (type === 'Accrued Revenue') {
+            options = '<option value="Service Revenue">Service Revenue</option>';
         }
         // Add more conditions for other types if necessary
         $('#adjustmentOption').html(options);

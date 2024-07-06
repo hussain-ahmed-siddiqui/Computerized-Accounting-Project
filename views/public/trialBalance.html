@@ -433,70 +433,71 @@
         })
 
         $(document).ready(() => {
-            $.get('http://localhost:3000/allAccountsData', {}, function(data) {
-                data = JSON.parse(data);
-                console.log(data);
-                tableHTML = '';
-                totalDeb = totalCred = 0;
-                flag = true;
-                for (let i = 0; i < data.length; i++) {
-                    $.get(`http://localhost:3000/showAccountLedger/${data[i].id}`, {}, function(data2) {
-                        let account = data[i].name
-                        let accType = data[i].type
-                        let debSum = 0;
-                        let credSum = 0;
-                        data2 = JSON.parse(data2);
-                        console.log(data2);
-                        for (let j = 1; j < data2.length; j++) {
-                            flag = false;
-                            if (data2[j].debitAccounts === account) {
-                                debSum += parseInt(data2[j].debitValues)
-                            } else if (data2[j].creditAccounts === account) {
-                                credSum += parseInt(data2[j].creditValues)
-                            } else if (data2[j].debitAccounts.includes(account)) {
-                                let debAccs = data2[j].debitAccounts.split(',')
-                                let debVals = data2[j].debitValues.split(',')
-                                let index = debAccs.indexOf(account)
-                                debSum += parseInt(debVals[index])
-                            } else if (data2[j].creditAccounts.includes(account)) {
-                                let credAccs = data2[j].creditAccounts.split(',')
-                                let credVals = data2[j].creditValues.split(',')
-                                let index = credAccs.indexOf(account)
-                                credSum += parseInt(credVals[index])
-                            }
-                        }
-                        if (debSum !== credSum) {
-                            debSum -= credSum
-                            if (debSum > 0) {
-                                tableHTML += `<tr><td>${accType}</td><td>${account}</td><td>${debSum}</td><td></td></tr>`;
-                                totalDeb += debSum;
-                            } else {
-                                debSum = -1 * debSum;
-                                tableHTML += `<tr><td>${accType}</td><td>${account}</td><td></td><td>${debSum}</td></tr>`;
-                                totalCred += debSum;
-                            }
-                            if (i === data.length - 1) {
-                                tableHTML += `<tr class="text-center" style="display: none;"><th>Total</th><th></th><th>${totalDeb}</th><th>${totalCred}</th></tr>`
-                                document.getElementById('tableBody').innerHTML = tableHTML;
-                                document.getElementById('footTotalDeb').innerText = totalDeb;
-                                document.getElementById('footTotalCred').innerText = totalCred;
-                            }
-                        }
-                        if (flag && i === data.length - 1) {
-                            $(function() {
-                                $("#example1").DataTable({
-                                    "responsive": true,
-                                    "lengthChange": false,
-                                    "autoWidth": false,
-                                    "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
-                                }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-                            });
+    $.get('http://localhost:3000/allAccountsData', {}, function(data) {
+        let tableHTML = '';
+        let totalDeb = 0;
+        let totalCred = 0;
+        data = JSON.parse(data);
 
-                        }
-                    })
+        data.forEach((account, index) => {
+            $.get(`http://localhost:3000/showAccountLedger/${account.id}`, {}, function(result) {
+                result = JSON.parse(result);
+                console.log(result);
+                let debSum = 0;
+                let credSum = 0;
+
+                result.forEach((transaction, j) => {
+                    if (j > 0) { // assuming first element is not a transaction
+                        const debAccs = transaction.debitAccounts.split(',');
+                        const debVals = transaction.debitValues.split(',');
+                        const credAccs = transaction.creditAccounts.split(',');
+                        const credVals = transaction.creditValues.split(',');
+                        debAccs.forEach((acc, idx) => {
+                            if (acc.trim() === account.name) {
+                                debSum += parseInt(debVals[idx], 10);
+                            }
+                        });
+
+                        credAccs.forEach((acc, idx) => {
+                            if (acc.trim() === account.name) {
+                                credSum += parseInt(credVals[idx], 10);
+                            }
+                        });
+                    }
+                });
+
+                let netSum = debSum - credSum;
+                if (netSum !== 0) {
+                    if (netSum > 0) {
+                        tableHTML += `<tr><td>${account.type}</td><td>${account.name}</td><td>${netSum}</td><td></td></tr>`;
+                        totalDeb += netSum;
+                    } else {
+                        netSum = -netSum;
+                        tableHTML += `<tr><td>${account.type}</td><td>${account.name}</td><td></td><td>${netSum}</td></tr>`;
+                        totalCred += netSum;
+                    }
                 }
-            })
-        })
+
+                if (index === data.length - 1) { // Last account processed
+                    $('#tableBody').html(tableHTML);
+                    $('#footTotalDeb').text(totalDeb);
+                    $('#footTotalCred').text(totalCred);
+
+                    // Ensure DataTable is not initialized until all data is loaded
+                    $(function() {
+                        $("#example1").DataTable({
+                            "responsive": true,
+                            "lengthChange": false,
+                            "autoWidth": false,
+                            "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+                        }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+                    });
+                }
+            });
+        });
+    });
+});
+
     </script>
 
 </body>

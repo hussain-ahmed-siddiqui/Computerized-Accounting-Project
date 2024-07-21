@@ -233,8 +233,9 @@ app.get('/showAccountLedger/:id', (req, res) => {
                 if (err) {
                     throw err;
                 }
-                console.log('Selected Transactions');
+                console.log('Selected Transactions '+result);
                 result = [...result, ...result2]
+                console.log(result);
                 data = JSON.stringify(result)
                 res.send(data);
             });

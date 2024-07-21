@@ -280,50 +280,55 @@
                 </div>
 
                 <!-- Create/Edit Adjustment Modal -->
-                <div class="modal fade" id="addAdjustmentModal" tabindex="-1" role="dialog" aria-labelledby="addAdjustmentModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="addAdjustmentModalLabel">Create/Edit Adjustment</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div class="modal-body">
-                                <form id="adjustmentForm">
-                                    <div class="form-group">
-                                        <label for="adjustmentDate">Date</label>
-                                        <input type="date" class="form-control" id="adjustmentDate" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="debitAccount">Debit Account</label>
-                                        <input type="text" class="form-control" id="debitAccount" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="debitAmount">Debit Amount</label>
-                                        <input type="number" class="form-control" id="debitAmount" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="creditAccount">Credit Account</label>
-                                        <input type="text" class="form-control" id="creditAccount" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="creditAmount">Credit Amount</label>
-                                        <input type="number" class="form-control" id="creditAmount" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="adjustmentDescription">Description</label>
-                                        <textarea class="form-control" id="adjustmentDescription" rows="3" required></textarea>
-                                    </div>
-                                </form>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-primary" id="saveAdjustment">Save Adjustment</button>
-                            </div>
-                        </div>
+<div class="modal fade" id="addAdjustmentModal" tabindex="-1" role="dialog" aria-labelledby="addAdjustmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addAdjustmentModalLabel">Create/Edit Adjustment</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="adjustmentForm">
+                    <div class="form-group">
+                        <label for="adjustmentDate">Date</label>
+                        <input type="date" class="form-control" id="adjustmentDate" required>
                     </div>
-                </div>
+                    <div class="form-group">
+                        <label for="adjustmentType">Adjustment Type</label>
+                        <select class="form-control" id="adjustmentType" required>
+                            <option value="">Select Type</option>
+                            <option value="Depreciation">Depreciation</option>
+                            <option value="Accrued Expense">Accrued Expense</option>
+                            <option value="Accrued Revenue">Accrued Revenue</option>
+                            <!-- Add other types as needed -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="adjustmentOption">Option</label>
+                        <select class="form-control" id="adjustmentOption" required>
+                            <!-- Options added dynamically based on type -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="adjustmentAmount">Amount</label>
+                        <input type="number" class="form-control" id="adjustmentAmount" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adjustmentDescription">Description</label>
+                        <textarea class="form-control" id="adjustmentDescription" rows="3" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveAdjustment">Save Adjustment</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
             </section>
             <!-- /.content -->
@@ -426,15 +431,25 @@
             let adjustments = []; // Array to hold pending adjustments
 
             $('#saveAdjustment').click(function() {
+                const adjustmentType = $('#adjustmentType').val();
+                const adjustmentOption = $('#adjustmentOption').val();
+                const amount = $('#adjustmentAmount').val();
+                if (adjustmentType === 'Depreciation'){
+                    var debitAccount = 'Dep. Expense '+adjustmentOption; var creditAccount = 'Acc. Dep '+adjustmentOption;
+                }else if(adjustmentType === 'Accrued Revenue'){
+                    var debitAccount = 'Accounts Receivable'; var creditAccount = 'Service Revenue';
+                }else if(adjustmentType === 'Accrued Expense'){
+                    var debitAccount = adjustmentOption+' Expense'; var creditAccount = 'Accounts Payable';
+                }
                 const adjustment = {
                     date: $('#adjustmentDate').val(),
-                    debitAccount: $('#debitAccount').val(),
-                    debitAmount: $('#debitAmount').val(),
-                    creditAccount: $('#creditAccount').val(),
-                    creditAmount: $('#creditAmount').val(),
+                    debitAccount: debitAccount,
+                    debitAmount: amount,
+                    creditAccount: creditAccount,
+                    creditAmount: amount,
                     description: $('#adjustmentDescription').val()
-                    
     };
+            console.log(adjustment);
 
                 // Add the adjustment to the array
                 adjustments.push(adjustment);
@@ -490,6 +505,26 @@
                 });
             });
         });
+
+        $(document).ready(function() {
+    $('#adjustmentType').change(function() {
+        var type = $(this).val();
+        var options = '';
+        if (type === 'Depreciation') {
+            options = '<option value="Building">Building</option><option value="F & F">Furniture & Fixtures</option>';
+        } else if (type === 'Accrued Expense') {
+            options = '<option value="Rental">Rent</option><option value="Supplies">Supplies</option><option value="Salary">Salary</option>';
+        }
+         else if (type === 'Accrued Revenue') {
+            options = '<option value="Service Revenue">Service Revenue</option>';
+        }
+        // Add more conditions for other types if necessary
+        $('#adjustmentOption').html(options);
+    });
+
+    // Additional existing scripts...
+});
+
     </script>
 
 </body>

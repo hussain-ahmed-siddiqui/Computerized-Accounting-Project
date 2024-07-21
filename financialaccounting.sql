@@ -76,6 +76,17 @@ CREATE TABLE `transactions` (
   `creditValues` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `adjustments`(
+`id` INT AUTO_INCREMENT PRIMARY KEY,
+`transactionDate` varchar(20) DEFAULT NULL,
+description VARCHAR(255)
+
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+ALTER TABLE `adjustments`
+ADD column `transaction_id` INT,
+ADD CONSTRAINT `fk_transaction_id`
+FOREIGN KEY (`transaction_id`) REFERENCES `transactions`(`id`)
+ON DELETE CASCADE;
 --
 -- Dumping data for table `transactions`
 --
